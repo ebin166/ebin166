@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ebin's Playground</title>
+    <style>
+        :root {
+            --bg: #fff8ee;
+            --card: #ffffff;
+            --text: #2b2b3a;
+            --muted: #6b6b80;
+            --accent: #ff5e7e;
+            --accent-2: #4c8dff;
+            --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #16161f;
+                --card: #22222e;
+                --text: #f1f1f6;
+                --muted: #a3a3b8;
+                --shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            }
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 24px 16px 48px;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+        main { max-width: 720px; margin: 0 auto; }
+        h1 { font-size: clamp(2rem, 6vw, 3rem); margin: 0.2em 0; }
+        h1 .wave { display: inline-block; animation: wave 2s infinite; transform-origin: 70% 70%; }
+        @keyframes wave {
+            0%, 60%, 100% { transform: rotate(0); }
+            10%, 30% { transform: rotate(14deg); }
+            20%, 40% { transform: rotate(-8deg); }
+        }
+        .subtitle { color: var(--muted); margin-top: 0; }
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+        .card h2 { margin-top: 0; font-size: 1.25rem; }
+        button {
+            font: inherit;
+            font-weight: 600;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #fff;
+            background: var(--accent);
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.95); }
+        button.secondary { background: var(--accent-2); }
+        #fact { min-height: 3em; font-size: 1.1rem; }
+        #arena {
+            position: relative;
+            height: 260px;
+            border-radius: 12px;
+            background: repeating-linear-gradient(45deg, transparent 0 12px, rgba(128, 128, 128, 0.07) 12px 24px);
+            overflow: hidden;
+            margin: 12px 0;
+        }
+        #target {
+            position: absolute;
+            font-size: 2.5rem;
+            cursor: pointer;
+            user-select: none;
+            display: none;
+            transition: left 0.15s, top 0.15s;
+        }
+        .stats { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+        .stats span { font-weight: 600; }
+        .confetti {
+            position: fixed;
+            width: 8px;
+            height: 12px;
+            pointer-events: none;
+            animation: fall 1.4s ease-in forwards;
+        }
+        @keyframes fall {
+            to { transform: translate(var(--dx), 110vh) rotate(720deg); opacity: 0.6; }
+        }
+        footer { text-align: center; color: var(--muted); margin-top: 32px; font-size: 0.9rem; }
+        a { color: var(--accent-2); }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Ebin's Playground <span class="wave">👋</span></h1>
+    <p class="subtitle">A little corner of the internet for fun experiments. Click anywhere for confetti!</p>
+
+    <section class="card">
+        <h2>🎲 Surprise me</h2>
+        <p id="fact">Press the button for a random fun fact.</p>
+        <button id="fact-btn">Another one!</button>
+    </section>
+
+    <section class="card">
+        <h2>🎯 Catch the emoji</h2>
+        <p class="subtitle">Tap the emoji as many times as you can in 15 seconds.</p>
+        <div class="stats">
+            <button class="secondary" id="start-btn">Start</button>
+            <div>Score: <span id="score">0</span></div>
+            <div>Time: <span id="time">15</span>s</div>
+            <div>Best: <span id="best">0</span></div>
+        </div>
+        <div id="arena"><div id="target">🐸</div></div>
+    </section>
+
+    <section class="card">
+        <h2>🎨 Mood color</h2>
+        <p class="subtitle">Not sure what color today is? Let the page decide.</p>
+        <button id="color-btn">Pick today's color</button>
+        <p id="color-name"></p>
+    </section>
+
+    <footer><a href="../index.html">← Back to my page</a></footer>
+</main>
+
+<script>
+    const facts = [
+        "Octopuses have three hearts and blue blood.",
+        "Honey never spoils. Archaeologists have found edible honey in ancient Egyptian tombs.",
+        "A group of flamingos is called a 'flamboyance'.",
+        "Bananas are berries, but strawberries aren't.",
+        "Wombat poop is cube-shaped.",
+        "The Eiffel Tower can grow about 15 cm taller in summer due to heat expansion.",
+        "Sea otters hold hands while sleeping so they don't drift apart.",
+        "A day on Venus is longer than a year on Venus.",
+        "The first computer bug was an actual moth stuck in a relay in 1947.",
+        "Cows have best friends and get stressed when separated."
+    ];
+    const emojis = ["🐸", "🦄", "🍕", "🚀", "🐙", "🌮", "🦖", "🍩"];
+    const colors = ["#ff5e7e", "#4c8dff", "#ffc53d", "#2ecc71", "#a66cff", "#ff8a3d", "#1ec8c8"];
+
+    // Random fun fact, never the same one twice in a row
+    let lastFact = -1;
+    document.getElementById("fact-btn").addEventListener("click", () => {
+        let i;
+        do { i = Math.floor(Math.random() * facts.length); } while (i === lastFact);
+        lastFact = i;
+        document.getElementById("fact").textContent = facts[i];
+    });
+
+    // Confetti on any click
+    function confetti(x, y) {
+        for (let n = 0; n < 16; n++) {
+            const piece = document.createElement("div");
+            piece.className = "confetti";
+            piece.style.left = x + "px";
+            piece.style.top = y + "px";
+            piece.style.background = colors[n % colors.length];
+            piece.style.setProperty("--dx", (Math.random() * 200 - 100) + "px");
+            piece.style.animationDuration = (1 + Math.random()) + "s";
+            document.body.appendChild(piece);
+            piece.addEventListener("animationend", () => piece.remove());
+        }
+    }
+    document.addEventListener("click", (e) => confetti(e.clientX, e.clientY));
+
+    // Catch-the-emoji game
+    const arena = document.getElementById("arena");
+    const target = document.getElementById("target");
+    const scoreEl = document.getElementById("score");
+    const timeEl = document.getElementById("time");
+    const bestEl = document.getElementById("best");
+    const startBtn = document.getElementById("start-btn");
+    let score = 0, timeLeft = 15, timer = null;
+
+    let best = 0;
+    try { best = Number(localStorage.getItem("playground-best")) || 0; } catch (e) {}
+    bestEl.textContent = best;
+
+    function moveTarget() {
+        const maxX = arena.clientWidth - 50;
+        const maxY = arena.clientHeight - 50;
+        target.style.left = Math.random() * maxX + "px";
+        target.style.top = Math.random() * maxY + "px";
+        target.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    }
+
+    function endGame() {
+        clearInterval(timer);
+        timer = null;
+        target.style.display = "none";
+        startBtn.disabled = false;
+        startBtn.textContent = "Play again";
+        if (score > best) {
+            best = score;
+            bestEl.textContent = best;
+            try { localStorage.setItem("playground-best", best); } catch (e) {}
+        }
+    }
+
+    startBtn.addEventListener("click", () => {
+        score = 0;
+        timeLeft = 15;
+        scoreEl.textContent = score;
+        timeEl.textContent = timeLeft;
+        startBtn.disabled = true;
+        target.style.display = "block";
+        moveTarget();
+        timer = setInterval(() => {
+            timeLeft--;
+            timeEl.textContent = timeLeft;
+            if (timeLeft <= 0) endGame();
+        }, 1000);
+    });
+
+    target.addEventListener("click", () => {
+        if (!timer) return;
+        score++;
+        scoreEl.textContent = score;
+        moveTarget();
+    });
+
+    // Mood color
+    const moods = [
+        ["Sunny Yellow", "#ffc53d"], ["Ocean Blue", "#4c8dff"], ["Bubblegum Pink", "#ff5e7e"],
+        ["Mint Green", "#2ecc71"], ["Galaxy Purple", "#a66cff"], ["Tangerine", "#ff8a3d"]
+    ];
+    document.getElementById("color-btn").addEventListener("click", () => {
+        const [name, hex] = moods[Math.floor(Math.random() * moods.length)];
+        const el = document.getElementById("color-name");
+        el.textContent = "Today's color is " + name + "!";
+        el.style.color = hex;
+        el.style.fontWeight = "700";
+        document.documentElement.style.setProperty("--accent", hex);
+    });
+</script>
+</body>
+</html>
