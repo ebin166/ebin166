@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta property="og:title" content="Sorry, Jess Kuttans">
+<meta property="og:description" content="Special delivery for you. Tap to open.">
+<title>Sorry, Jess Kuttans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chewy&family=Caveat:wght@500;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+  /* Layout: one centered "stage" card per scene, tapped through like a little storybook. Single committed look (strawberry milk), same in any theme. */
+  :root {
+    --milk: #ffe4ec;
+    --milk-deep: #ffc9d8;
+    --berry: #d81b5c;
+    --berry-dark: #9e0f40;
+    --ink: #3b1426;
+    --ink-soft: #7a4a5e;
+    --butter: #ffd66b;
+    --paper: #fffafc;
+    --display: "Chewy", "Comic Sans MS", "Chalkboard SE", cursive;
+    --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+    --body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: light;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--milk);
+    background-image: radial-gradient(var(--milk-deep) 1.5px, transparent 1.5px);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  .wrap {
+    min-height: 100%;
+    display: grid;
+    place-items: center;
+    padding-inline: 16px;
+    padding-block: 24px;
+  }
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 28px;
+    box-shadow: 8px 8px 0 var(--ink);
+    padding: 28px 22px 24px;
+    text-align: center;
+  }
+  .scene[hidden] { display: none !important; }
+  .scene { display: grid; gap: 16px; justify-items: center; animation: pop-in 0.5s cubic-bezier(.2,1.6,.4,1) both; }
+  @keyframes pop-in { from { transform: scale(0.85) rotate(-2deg); opacity: 0.2; } to { transform: none; opacity: 1; } }
+
+  h1, h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    color: var(--berry);
+    line-height: 1.1;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 { font-size: clamp(2.1rem, 9vw, 2.8rem); }
+  h2 { font-size: clamp(1.7rem, 7vw, 2.2rem); }
+  p { margin: 0; max-width: 34ch; text-wrap: pretty; }
+  .hand { font-family: var(--hand); font-size: 1.55rem; line-height: 1.2; color: var(--ink-soft); }
+  .small { font-size: 0.85rem; color: var(--ink-soft); }
+
+  .btn {
+    font-family: var(--display);
+    font-size: 1.35rem;
+    letter-spacing: 0.02em;
+    color: var(--paper);
+    background: var(--berry);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 10px 26px;
+    box-shadow: 4px 4px 0 var(--ink);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.12s, box-shadow 0.12s, background 0.2s;
+  }
+  .btn:hover { background: var(--berry-dark); }
+  .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+  .btn:focus-visible { outline: 3px dashed var(--berry); outline-offset: 4px; }
+  .btn.ghost { background: var(--paper); color: var(--ink); }
+  .btn.ghost:hover { background: var(--milk); }
+
+  /* Envelope */
+  .envelope { width: 190px; max-width: 100%; cursor: pointer; animation: wiggle 1.6s ease-in-out infinite; background: none; border: 0; padding: 0; }
+  .envelope:focus-visible { outline: 3px dashed var(--berry); outline-offset: 6px; border-radius: 12px; }
+  @keyframes wiggle { 0%, 70%, 100% { transform: rotate(0); } 76% { transform: rotate(-7deg); } 84% { transform: rotate(6deg); } 92% { transform: rotate(-3deg); } }
+
+  /* The little blob */
+  .blob { width: 150px; height: 150px; overflow: visible; }
+  .blob .body { animation: squish 2.4s ease-in-out infinite; transform-origin: 75px 140px; }
+  @keyframes squish { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.04, 0.96); } }
+  .blob .eyes { animation: blink 4s infinite; transform-origin: 75px 70px; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+  .blob .happy-mouth, .blob .blush { display: none; }
+  .blob.happy .sad-mouth, .blob.happy .brows { display: none; }
+  .blob.happy .happy-mouth, .blob.happy .blush { display: inline; }
+  .blob.happy .body { animation: bounce 0.6s ease-in-out infinite; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0) scale(1, 1); } 40% { transform: translateY(-16px) scale(0.96, 1.05); } 80% { transform: translateY(0) scale(1.06, 0.93); } }
+
+  /* Late-o-meter */
+  .meter { width: 100%; display: grid; gap: 8px; }
+  .meter-label { display: flex; justify-content: space-between; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .meter-track { position: relative; height: 30px; border: 3px solid var(--ink); border-radius: 999px; background: var(--milk); overflow: hidden; }
+  .meter-fill {
+    height: 100%; width: 0%;
+    background: repeating-linear-gradient(-45deg, var(--berry) 0 12px, var(--berry-dark) 12px 24px);
+    transition: width 2.2s cubic-bezier(.3,.8,.3,1);
+  }
+  .meter-readout { font-family: var(--display); font-size: 2.2rem; color: var(--berry); font-variant-numeric: tabular-nums; }
+  .warning {
+    background: var(--butter);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    transform: rotate(-2deg);
+  }
+  .warning[hidden] { display: none !important; }
+  .warning.show { animation: shake 0.5s 3; }
+  @keyframes shake { 0%, 100% { transform: rotate(-2deg) translateX(0); } 25% { transform: rotate(-2deg) translateX(-6px); } 75% { transform: rotate(-2deg) translateX(6px); } }
+
+  /* Question */
+  .choices { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; min-height: 70px; }
+  #yes-btn { transition: transform 0.25s cubic-bezier(.2,1.6,.4,1), box-shadow 0.12s, background 0.2s; }
+  #no-btn.running { position: fixed; z-index: 5; transition: left 0.25s ease-out, top 0.25s ease-out; }
+  .plea { min-height: 1.6em; }
+
+  /* Coupon */
+  .coupon {
+    width: 100%;
+    background: var(--butter);
+    border: 3px dashed var(--ink);
+    border-radius: 16px;
+    padding: 14px 16px;
+    text-align: left;
+    display: grid;
+    gap: 6px;
+    transform: rotate(1.5deg);
+  }
+  .coupon-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .coupon-title { font-family: var(--display); font-size: 1.4rem; color: var(--ink); }
+  .coupon-code { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+  .coupon ul { margin: 0; padding-left: 1.1em; }
+  .coupon .fine { font-size: 0.72rem; color: var(--ink-soft); }
+  .sign { font-family: var(--hand); font-size: 1.9rem; color: var(--berry); transform: rotate(-3deg); }
+
+  .progress { display: flex; gap: 6px; justify-content: center; margin-top: 18px; }
+  .progress span { width: 8px; height: 8px; border-radius: 50%; background: var(--milk-deep); border: 1.5px solid var(--ink); }
+  .progress span.on { background: var(--berry); }
+
+  /* Floating hearts */
+  .heart {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10;
+    color: var(--berry);
+    line-height: 1;
+    animation: float-up linear forwards;
+  }
+  @keyframes float-up {
+    0% { transform: translate(0, 0) rotate(0deg) scale(0.6); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1.1); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <main class="stage" aria-live="polite">
+
+    <!-- 1. Envelope -->
+    <section class="scene" data-scene="0">
+      <p class="hand">psst... special delivery for</p>
+      <h1>Jess Kuttans</h1>
+      <button class="envelope" id="envelope" aria-label="Open the letter">
+        <svg viewBox="0 0 200 140" width="100%" aria-hidden="true">
+          <rect x="6" y="20" width="188" height="114" rx="10" fill="#fffafc" stroke="#3b1426" stroke-width="5"/>
+          <path d="M8 26 L100 92 L192 26" fill="#ffc9d8" stroke="#3b1426" stroke-width="5" stroke-linejoin="round"/>
+          <path d="M100 58 C 92 46, 74 50, 78 64 C 82 76, 100 86, 100 86 C 100 86, 118 76, 122 64 C 126 50, 108 46, 100 58 Z" fill="#d81b5c" stroke="#3b1426" stroke-width="4"/>
+        </svg>
+      </button>
+      <p class="small">Tap the envelope. It doesn't bite. (I might, a little.)</p>
+    </section>
+
+    <!-- 2. Sad blob -->
+    <section class="scene" data-scene="1" hidden>
+      <svg class="blob" viewBox="0 0 150 150" aria-hidden="true">
+        <g class="body">
+          <path d="M75 18 C 118 18, 138 52, 138 92 C 138 128, 112 142, 75 142 C 38 142, 12 128, 12 92 C 12 52, 32 18, 75 18 Z" fill="#ff8fb0" stroke="#3b1426" stroke-width="5"/>
+          <g class="brows" stroke="#3b1426" stroke-width="4" stroke-linecap="round">
+            <path d="M42 58 L58 51"/><path d="M108 58 L92 51"/>
+          </g>
+          <g class="eyes">
+            <ellipse cx="54" cy="72" rx="10" ry="13" fill="#3b1426"/>
+            <ellipse cx="96" cy="72" rx="10" ry="13" fill="#3b1426"/>
+            <circle cx="57" cy="67" r="4" fill="#fff"/><circle cx="99" cy="67" r="4" fill="#fff"/>
+          </g>
+          <path class="sad-mouth" d="M62 112 Q 75 100, 88 112" fill="none" stroke="#3b1426" stroke-width="5" stroke-linecap="round"/>
+          <path class="happy-mouth" d="M58 102 Q 75 126, 92 102 Z" fill="#9e0f40" stroke="#3b1426" stroke-width="4" stroke-linejoin="round"/>
+          <ellipse class="blush" cx="36" cy="96" rx="9" ry="5" fill="#d81b5c" opacity="0.45"/>
+          <ellipse class="blush" cx="114" cy="96" rx="9" ry="5" fill="#d81b5c" opacity="0.45"/>
+        </g>
+      </svg>
+      <h2>Hi Jess Kuttans...</h2>
+      <p>I said I'd call you, then I got busy and called you a little later than I promised. Sorry for making you wait.</p>
+      <p class="hand">This is me right now ↑ (a little sheepish, slightly squishy)</p>
+      <button class="btn next">Keep reading</button>
+    </section>
+
+    <!-- 3. The website itself -->
+    <section class="scene" data-scene="2" hidden>
+      <h2>So I made you a little website.</h2>
+      <p>A text saying "sorry I'm late" felt too small. So here's a website. With buttons and everything.</p>
+      <p class="hand">(Please be a little impressed.)</p>
+      <button class="btn next">Wow, go on</button>
+    </section>
+
+    <!-- 4. Late-o-meter -->
+    <section class="scene" data-scene="3" hidden>
+      <h2>Official Late-o-meter</h2>
+      <p class="small">Measuring exactly how late my call was. Please stand by.</p>
+      <div class="meter">
+        <div class="meter-label"><span>On time</span><span>Very late</span></div>
+        <div class="meter-track"><div class="meter-fill" id="meter-fill"></div></div>
+      </div>
+      <div class="meter-readout" id="meter-readout">Checking...</div>
+      <div class="warning" id="warning" hidden>Reason: got busy. Excuse quality: 3/10. Will do better.</div>
+      <button class="btn next" id="meter-next" hidden>Fair enough</button>
+    </section>
+
+    <!-- 5. The question -->
+    <section class="scene" data-scene="4" hidden>
+      <h2>So... will you forgive me, Jess Kuttans?</h2>
+      <p class="hand plea" id="plea">Choose wisely.</p>
+      <div class="choices">
+        <button class="btn" id="yes-btn">Yes</button>
+        <button class="btn ghost" id="no-btn">No</button>
+      </div>
+    </section>
+
+    <!-- 6. Yay -->
+    <section class="scene" data-scene="5" hidden>
+      <svg class="blob happy" viewBox="0 0 150 150" aria-hidden="true">
+        <g class="body">
+          <path d="M75 18 C 118 18, 138 52, 138 92 C 138 128, 112 142, 75 142 C 38 142, 12 128, 12 92 C 12 52, 32 18, 75 18 Z" fill="#ff8fb0" stroke="#3b1426" stroke-width="5"/>
+          <g class="eyes">
+            <ellipse cx="54" cy="72" rx="10" ry="13" fill="#3b1426"/>
+            <ellipse cx="96" cy="72" rx="10" ry="13" fill="#3b1426"/>
+            <circle cx="57" cy="67" r="4" fill="#fff"/><circle cx="99" cy="67" r="4" fill="#fff"/>
+          </g>
+          <path class="happy-mouth" d="M58 102 Q 75 126, 92 102 Z" fill="#9e0f40" stroke="#3b1426" stroke-width="4" stroke-linejoin="round"/>
+          <ellipse class="blush" cx="36" cy="96" rx="9" ry="5" fill="#d81b5c" opacity="0.45"/>
+          <ellipse class="blush" cx="114" cy="96" rx="9" ry="5" fill="#d81b5c" opacity="0.45"/>
+        </g>
+      </svg>
+      <h1>YAYYY!</h1>
+      <p>I knew you couldn't resist. Thank you, Jess Kuttans. Next call, I'll be early. I love you.</p>
+      <div class="coupon">
+        <div class="coupon-head">
+          <span class="coupon-title">Official Sorry Coupon</span>
+          <span class="coupon-code">No. JESS-001</span>
+        </div>
+        <ul>
+          <li>1 long call, phone on do-not-disturb, at a time you choose</li>
+          <li>You pick the movie. No complaints from me.</li>
+          <li>1 extra-long hug, on demand</li>
+        </ul>
+        <span class="fine">Never expires. Extra valid if I'm ever late again. Boyfriend is not allowed to say no.</span>
+      </div>
+      <p class="sign">— yours, Ebin</p>
+      <button class="btn ghost" id="replay">Watch again</button>
+    </section>
+
+    <div class="progress" id="progress" aria-hidden="true"></div>
+  </main>
+</div>
+
+<script>
+  const scenes = [...document.querySelectorAll(".scene")];
+  const progress = document.getElementById("progress");
+  scenes.forEach(() => progress.appendChild(document.createElement("span")));
+  let current = 0;
+
+  function show(i) {
+    scenes[current].hidden = true;
+    current = i;
+    scenes[current].hidden = false;
+    // restart the pop-in animation
+    scenes[current].style.animation = "none";
+    void scenes[current].offsetWidth;
+    scenes[current].style.animation = "";
+    [...progress.children].forEach((d, n) => d.classList.toggle("on", n <= current));
+    if (current === 3) runMeter();
+    if (current === 5) celebrate();
+  }
+  show(0);
+
+  document.querySelectorAll(".next").forEach(b => b.addEventListener("click", () => show(current + 1)));
+  document.getElementById("envelope").addEventListener("click", (e) => {
+    burst(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2, 14);
+    show(1);
+  });
+
+  // Hearts
+  function heart(x, y, opts = {}) {
+    const h = document.createElement("span");
+    h.className = "heart";
+    h.textContent = "❤";
+    h.style.left = x + "px";
+    h.style.top = y + "px";
+    h.style.fontSize = (opts.size || 14 + Math.random() * 22) + "px";
+    h.style.setProperty("--dx", (opts.dx ?? (Math.random() * 240 - 120)) + "px");
+    h.style.setProperty("--dy", (opts.dy ?? -(160 + Math.random() * 260)) + "px");
+    h.style.setProperty("--rot", (Math.random() * 60 - 30) + "deg");
+    h.style.animationDuration = (opts.dur || 1.4 + Math.random() * 1.4) + "s";
+    if (Math.random() < 0.3) h.style.color = "#ff8fb0";
+    document.body.appendChild(h);
+    h.addEventListener("animationend", () => h.remove());
+  }
+  function burst(x, y, n) { for (let i = 0; i < n; i++) heart(x, y); }
+
+  // Gentle ambient hearts rising from the bottom
+  setInterval(() => {
+    if (document.hidden) return;
+    heart(Math.random() * innerWidth, innerHeight + 10, { dx: Math.random() * 60 - 30, dy: -(innerHeight + 60), dur: 6 + Math.random() * 4, size: 10 + Math.random() * 14 });
+  }, 900);
+
+  // Late-o-meter
+  function runMeter() {
+    const fill = document.getElementById("meter-fill");
+    const readout = document.getElementById("meter-readout");
+    const warning = document.getElementById("warning");
+    const next = document.getElementById("meter-next");
+    fill.style.width = "0%"; warning.hidden = true; next.hidden = true;
+    warning.classList.remove("show");
+    readout.textContent = "Checking...";
+    requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = "45%"; }));
+    setTimeout(() => {
+      readout.textContent = "Late. Sorry.";
+      warning.hidden = false;
+      warning.classList.add("show");
+      next.hidden = false;
+    }, 2400);
+  }
+
+  // The runaway "No" button
+  const yesBtn = document.getElementById("yes-btn");
+  const noBtn = document.getElementById("no-btn");
+  const plea = document.getElementById("plea");
+  const noLines = [
+    ["Are you sure?", "Hmm?"],
+    ["Really sure?", "Look at my sheepish face."],
+    ["Pleaaase", "I'll call on time next time."],
+    ["Think again", "I'll set an alarm."],
+    ["Jess Kuttans pls", "Okay, two alarms."],
+    ["Nope, not allowed", "This button is broken. Try the other one."]
+  ];
+  let noCount = 0;
+
+  function dodge(e) {
+    if (e) e.preventDefault();
+    const [label, line] = noLines[Math.min(noCount, noLines.length - 1)];
+    noCount++;
+    noBtn.textContent = label;
+    plea.textContent = line;
+    yesBtn.style.transform = "scale(" + Math.min(1 + noCount * 0.18, 2.2) + ")";
+    // Move it to <body> so it's positioned against the screen, not the animated card
+    if (noBtn.parentElement !== document.body) document.body.appendChild(noBtn);
+    noBtn.classList.add("running");
+    const pad = 16;
+    const w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+    const yr = yesBtn.getBoundingClientRect();
+    let x, y, tries = 0;
+    do {
+      x = pad + Math.random() * Math.max(innerWidth - w - pad * 2, 0);
+      y = pad + Math.random() * Math.max(innerHeight - h - pad * 2, 0);
+      tries++;
+    } while (tries < 20 && x < yr.right + 10 && x + w > yr.left - 10 && y < yr.bottom + 10 && y + h > yr.top - 10);
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+    if (noCount >= noLines.length + 2) {
+      // She's persistent. The button gives up and changes sides.
+      noBtn.textContent = "Yes";
+      noBtn.classList.remove("ghost");
+      noBtn.removeEventListener("pointerenter", dodge);
+      noBtn.removeEventListener("pointerdown", dodge);
+      noBtn.onclick = forgive;
+      plea.textContent = "Fine. Now both buttons say yes.";
+    }
+  }
+  noBtn.addEventListener("pointerenter", dodge);
+  noBtn.addEventListener("pointerdown", dodge);
+  noBtn.addEventListener("click", (e) => { if (!noBtn.onclick && e.detail === 0) dodge(e); }); // keyboard presses
+
+  const choices = document.querySelector(".choices");
+  function forgive() {
+    choices.appendChild(noBtn);
+    noBtn.classList.remove("running");
+    noBtn.style.left = noBtn.style.top = "";
+    show(5);
+  }
+  yesBtn.addEventListener("click", forgive);
+
+  function celebrate() {
+    for (let i = 0; i < 60; i++) {
+      setTimeout(() => heart(Math.random() * innerWidth, innerHeight * (0.4 + Math.random() * 0.5)), i * 30);
+    }
+  }
+
+  document.getElementById("replay").addEventListener("click", () => {
+    noCount = 0;
+    noBtn.textContent = "No";
+    noBtn.classList.add("ghost");
+    noBtn.onclick = null;
+    noBtn.addEventListener("pointerenter", dodge);
+    noBtn.addEventListener("pointerdown", dodge);
+    yesBtn.style.transform = "";
+    plea.textContent = "Choose wisely.";
+    show(0);
+  });
+</script>
+
+</body>
+</html>
